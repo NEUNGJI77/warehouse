@@ -1,0 +1,27 @@
+{
+  "P001": {
+    "name": "노트북",
+    "quantity": 50,
+    "location": "A-1-1"
+  },
+  "P002": {
+    "name": "마우스",
+    "quantity": 200,
+    "location": "A-1-2"
+  },
+  "P003": {
+    "name": "키보드",
+    "quantity": 150,
+    "location": "B-1-1"
+  },
+  "P004": {
+    "name": "모니터",
+    "quantity": 30,
+    "location": "B-1-2"
+  },
+  "P005": {
+    "name": "프린터",
+    "quantity": 15,
+    "location": "C-1-1"
+  }
+}

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>물류창고 자동화 시스템</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#0f172a;--card:#162032;--border:rgba(255,255,255,.07);
+      --text:#e2e8f0;--muted:#64748b;--accent:#38bdf8;
+      --green:#22c55e;--orange:#f97316;--purple:#a78bfa;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;overflow-x:hidden;}
+
+    /* ── NAV ── */
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:.9rem 3rem;background:rgba(15,23,42,.85);
+      backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+    }
+    .nav-logo{font-size:1.05rem;font-weight:800;color:var(--accent);}
+    .nav-login{
+      padding:.45rem 1.2rem;border-radius:8px;background:#2563eb;
+      color:#fff;font-size:.85rem;font-weight:600;text-decoration:none;
+      transition:background .15s;
+    }
+    .nav-login:hover{background:#1d4ed8;}
+
+    /* ── HERO ── */
+    .hero{
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;text-align:center;
+      padding:6rem 2rem 4rem;position:relative;overflow:hidden;
+    }
+    .hero::before{
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(ellipse 80% 60% at 50% 30%, rgba(56,189,248,.08) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:.4rem;
+      background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);
+      color:var(--accent);padding:.35rem .9rem;border-radius:999px;
+      font-size:.78rem;font-weight:600;margin-bottom:1.5rem;
+    }
+    .hero h1{
+      font-size:clamp(2.2rem,5vw,3.8rem);font-weight:900;
+      line-height:1.15;margin-bottom:1.2rem;
+      background:linear-gradient(135deg,#e2e8f0 0%,#38bdf8 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .hero p{font-size:1.1rem;color:var(--muted);max-width:560px;line-height:1.7;margin-bottom:2.5rem;}
+    .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+    .btn-primary{
+      padding:.75rem 2rem;border-radius:10px;background:#2563eb;
+      color:#fff;font-size:.95rem;font-weight:700;text-decoration:none;
+      transition:all .15s;border:none;cursor:pointer;
+    }
+    .btn-primary:hover{background:#1d4ed8;transform:translateY(-1px);}
+    .btn-ghost{
+      padding:.75rem 2rem;border-radius:10px;
+      border:1px solid var(--border);color:var(--muted);
+      font-size:.95rem;font-weight:600;text-decoration:none;transition:all .15s;
+    }
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+
+    /* ── STATS BAR ── */
+    .stats-bar{
+      display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;
+      padding:2rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+      background:rgba(22,32,50,.6);
+    }
+    .stat-item{text-align:center;}
+    .stat-item .val{font-size:1.8rem;font-weight:800;color:var(--accent);}
+    .stat-item .lbl{font-size:.78rem;color:var(--muted);margin-top:.2rem;}
+
+    /* ── FEATURES ── */
+    .section{padding:5rem 2rem;max-width:1100px;margin:0 auto;}
+    .section-label{font-size:.78rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem;}
+    .section h2{font-size:2rem;font-weight:800;margin-bottom:.8rem;}
+    .section .sub{font-size:1rem;color:var(--muted);margin-bottom:3rem;max-width:500px;}
+    .features{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;}
+    .feat-card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:14px;padding:1.6rem;transition:border-color .2s,transform .2s;
+    }
+    .feat-card:hover{border-color:rgba(56,189,248,.3);transform:translateY(-3px);}
+    .feat-icon{font-size:1.8rem;margin-bottom:.8rem;}
+    .feat-card h3{font-size:1rem;font-weight:700;margin-bottom:.5rem;}
+    .feat-card p{font-size:.85rem;color:var(--muted);line-height:1.6;}
+    .feat-tag{display:inline-block;margin-top:.8rem;padding:.2rem .6rem;border-radius:999px;font-size:.7rem;font-weight:600;}
+    .tag-blue{background:rgba(56,189,248,.12);color:var(--accent);}
+    .tag-green{background:rgba(34,197,94,.12);color:var(--green);}
+    .tag-orange{background:rgba(249,115,22,.12);color:var(--orange);}
+    .tag-purple{background:rgba(167,139,250,.12);color:var(--purple);}
+
+    /* ── FLOW ── */
+    .flow-wrap{background:rgba(22,32,50,.5);border-radius:16px;padding:2.5rem;border:1px solid var(--border);}
+    .flow{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:1.5rem;}
+    .flow-step{
+      text-align:center;background:var(--card);border:1px solid var(--border);
+      border-radius:12px;padding:1.2rem 1.5rem;min-width:130px;
+    }
+    .flow-step .step-icon{font-size:1.6rem;margin-bottom:.4rem;}
+    .flow-step .step-name{font-size:.82rem;font-weight:600;}
+    .flow-step .step-sub{font-size:.72rem;color:var(--muted);margin-top:.2rem;}
+    .flow-arrow{color:var(--muted);font-size:1.2rem;}
+
+    /* ── CTA ── */
+    .cta{
+      text-align:center;padding:5rem 2rem;
+      background:linear-gradient(180deg,transparent,rgba(37,99,235,.06));
+    }
+    .cta h2{font-size:2rem;font-weight:800;margin-bottom:.8rem;}
+    .cta p{color:var(--muted);margin-bottom:2rem;font-size:1rem;}
+
+    /* ── FOOTER ── */
+    footer{text-align:center;padding:1.5rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--muted);}
+
+    /* ── CODE SECTION ── */
+    .code-tab{
+      padding:.5rem 1.1rem;border-radius:8px 8px 0 0;border:1px solid var(--border);
+      border-bottom:none;background:rgba(255,255,255,.03);color:var(--muted);
+      font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;
+    }
+    .code-tab.active{background:var(--card);color:var(--accent);border-color:rgba(56,189,248,.3);}
+    .code-tab:hover:not(.active){color:var(--text);background:rgba(255,255,255,.06);}
+    .code-panel{background:var(--card);border:1px solid rgba(56,189,248,.2);border-radius:0 12px 12px 12px;overflow:hidden;}
+    .code-pane{display:none;grid-template-columns:1fr 1.3fr;gap:0;}
+    .code-pane.active{display:grid;}
+    .code-desc{padding:1.8rem;border-right:1px solid var(--border);}
+    .code-desc h3{font-size:1rem;font-weight:700;margin-bottom:.7rem;color:var(--text);}
+    .code-desc p{font-size:.84rem;color:var(--muted);line-height:1.7;margin-bottom:1rem;}
+    .code-desc ul{padding-left:1.1rem;font-size:.82rem;color:var(--muted);line-height:2;}
+    .code-desc code{background:rgba(56,189,248,.1);color:var(--accent);padding:.1rem .4rem;border-radius:4px;font-size:.78rem;}
+    .code-block{padding:0;overflow:auto;background:#0d1117;}
+    .code-header{display:flex;align-items:center;gap:.4rem;padding:.6rem 1rem;background:#161b22;border-bottom:1px solid var(--border);}
+    .dot-r,.dot-y,.dot-g{width:10px;height:10px;border-radius:50%;}
+    .dot-r{background:#ff5f56;}.dot-y{background:#ffbd2e;}.dot-g{background:#27c93f;}
+    .code-filename{font-size:.75rem;color:#8b949e;margin-left:.3rem;}
+    pre{margin:0;padding:1.2rem;font-size:.8rem;line-height:1.7;font-family:'Consolas','Fira Code',monospace;overflow-x:auto;color:#c9d1d9;}
+    .kw{color:#ff7b72;}.fn{color:#d2a8ff;}.st{color:#a5d6ff;}.nm{color:#f0883e;}
+    .cm{color:#8b949e;}.c{color:#79c0ff;}
+    .hl-green{color:var(--green);font-weight:600;}.hl-blue{color:var(--accent);font-weight:600;}
+    .hl-orange{color:var(--orange);font-weight:600;}.hl-red{color:#ef4444;font-weight:600;}
+    @media(max-width:700px){
+      .code-pane.active{grid-template-columns:1fr;}
+      .code-desc{border-right:none;border-bottom:1px solid var(--border);}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">📦 물류창고 자동화 시스템</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">🚀 Logistics Automation v2.0</div>
+  <h1>스마트 물류창고<br>관리 시스템</h1>
+  <p>실시간 재고 추적, 주문 관리, 입출고 자동화까지.<br>물류창고 운영의 모든 것을 하나의 대시보드에서.</p>
+  <div class="hero-btns">
+    <a href="#features" class="btn-primary">기능 살펴보기</a>
+  </div>
+</section>
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="val">실시간</div><div class="lbl">재고 현황 갱신</div></div>
+  <div class="stat-item"><div class="val">A·B·C</div><div class="lbl">구역별 재고 관리</div></div>
+  <div class="stat-item"><div class="val">5초</div><div class="lbl">자동 데이터 동기화</div></div>
+  <div class="stat-item"><div class="val">2가지</div><div class="lbl">권한 역할 관리</div></div>
+</div>
+
+<div class="section" id="features">
+  <div class="section-label">Core Features</div>
+  <h2>주요 기능</h2>
+  <p class="sub">물류창고 운영에 필요한 기능을 모두 제공합니다.</p>
+  <div class="features">
+    <div class="feat-card"><div class="feat-icon">📊</div><h3>실시간 대시보드</h3><p>전체 재고 현황, 주문 통계, 처리 명령 수를 한눈에 파악할 수 있는 통합 대시보드.</p><span class="feat-tag tag-blue">실시간 갱신</span></div>
+    <div class="feat-card"><div class="feat-icon">📋</div><h3>재고 현황 관리</h3><p>바코드 기반 재고 조회, 수량 증감 제어, 품목 삭제까지 직관적인 인터페이스로 관리.</p><span class="feat-tag tag-green">바코드 지원</span></div>
+    <div class="feat-card"><div class="feat-icon">📥</div><h3>신규 입고 등록</h3><p>바코드, 상품명, 수량, 보관 구역을 입력해 즉시 재고에 반영. 창고 구역 자동 배정.</p><span class="feat-tag tag-orange">즉시 반영</span></div>
+    <div class="feat-card"><div class="feat-icon">📦</div><h3>주문 관리</h3><p>출고·발주 주문 등록부터 대기 → 처리 → 완료까지 상태 흐름을 한 화면에서 관리.</p><span class="feat-tag tag-blue">상태 추적</span></div>
+    <div class="feat-card"><div class="feat-icon">🗺️</div><h3>창고 구역 시각화</h3><p>A·B·C 구역별 재고 현황을 시각적으로 확인. 구역 내 품목 목록 및 재고량 표시.</p><span class="feat-tag tag-green">구역별 현황</span></div>
+    <div class="feat-card"><div class="feat-icon">👤</div><h3>계정 및 권한 관리</h3><p>Admin과 Operator 역할 구분. 계정 추가·삭제·비밀번호 변경을 관리자가 직접 제어.</p><span class="feat-tag tag-purple">역할 기반</span></div>
+  </div>
+</div>
+
+<div style="max-width:1100px;margin:0 auto;padding:0 2rem 5rem;">
+  <div class="flow-wrap">
+    <div class="section-label">System Flow</div>
+    <h2 style="font-size:1.4rem;font-weight:800;">처리 흐름</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="step-icon">📥</div><div class="step-name">입고 등록</div><div class="step-sub">바코드 스캔</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="step-icon">🗄️</div><div class="step-name">재고 반영</div><div class="step-sub">data.json 저장</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="step-icon">📦</div><div class="step-name">주문 생성</div><div class="step-sub">출고·발주</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="step-icon">⚙️</div><div class="step-name">상태 처리</div><div class="step-sub">대기→완료</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="step-icon">📊</div><div class="step-name">대시보드</div><div class="step-sub">실시간 확인</div></div>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:1100px;margin:0 auto;padding:0 2rem 5rem;">
+  <div class="section-label">Code Walkthrough</div>
+  <h2 style="font-size:2rem;font-weight:800;margin-bottom:.6rem;">코드로 보는 시스템</h2>
+  <p style="color:var(--muted);margin-bottom:2rem;font-size:1rem;">핵심 로직을 코드와 함께 살펴보세요.</p>
+  <div style="display:flex;gap:.5rem;margin-bottom:0;flex-wrap:wrap;">
+    <button class="code-tab active" onclick="switchTab('api')">📡 API 엔드포인트</button>
+    <button class="code-tab" onclick="switchTab('ipc')">🔗 파일 기반 IPC</button>
+    <button class="code-tab" onclick="switchTab('data')">🗄️ 데이터 구조</button>
+    <button class="code-tab" onclick="switchTab('order')">📦 주문 처리</button>
+  </div>
+  <div class="code-panel">
+    <div class="code-pane active" id="pane-api">
+      <div class="code-desc">
+        <h3>재고 API 엔드포인트</h3>
+        <p>Flask로 구현된 RESTful API입니다. <code>/api/inventory</code>는 재고 데이터를 반환하고, <code>/api/update</code>는 수량 변경 및 신규 입고 명령을 처리합니다. 모든 엔드포인트는 세션 기반 로그인 인증이 필요합니다.</p>
+        <ul>
+          <li><span class="hl-green">GET</span> <code>/api/inventory</code> — data.json 전체 반환</li>
+          <li><span class="hl-blue">POST</span> <code>/api/update</code> — 수량 변경 / 신규 입고</li>
+          <li><span class="hl-red">DELETE</span> <code>/api/inventory/&lt;barcode&gt;</code> — 품목 삭제</li>
+        </ul>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span><span class="code-filename">LogisticsWeb.py</span></div>
+        <pre><span class="c">@app.route('/api/update', methods=['POST'])</span>
+<span class="c">@login_required</span>
+<span class="kw">def</span> <span class="fn">update_inventory</span>():
+    data = request.get_json()
+    cmd_type = data.get(<span class="st">'type'</span>)
+
+    <span class="cm"># commands.txt 에 명령 기록 (C++ 백엔드 연동)</span>
+    <span class="kw">with</span> open(CMD_PATH, <span class="st">'a'</span>) <span class="kw">as</span> f:
+        <span class="kw">if</span> cmd_type == <span class="st">'QTY'</span>:
+            f.write(<span class="st">f"QTY,{data['barcode']},{data['change']}\n"</span>)
+        <span class="kw">elif</span> cmd_type == <span class="st">'NEW'</span>:
+            f.write(<span class="st">f"NEW,{data['barcode']},{data['name']},"</span>
+                    <span class="st">f"{data['qty']},{data['zone']},"</span>
+                    <span class="st">f"{data['sec']},{data['shelf']}\n"</span>)
+
+    <span class="cm"># data.json 에 즉시 반영</span>
+    inventory = load_data()
+    <span class="kw">if</span> cmd_type == <span class="st">'QTY'</span>:
+        bc = data.get(<span class="st">'barcode'</span>)
+        inventory[bc][<span class="st">'quantity'</span>] = max(<span class="nm">0</span>,
+            inventory[bc][<span class="st">'quantity'</span>] + int(data[<span class="st">'change'</span>]))
+    <span class="kw">elif</span> cmd_type == <span class="st">'NEW'</span>:
+        inventory[data[<span class="st">'barcode'</span>]] = {
+            <span class="st">'name'</span>: data[<span class="st">'name'</span>],
+            <span class="st">'quantity'</span>: int(data[<span class="st">'qty'</span>]),
+            <span class="st">'location'</span>: <span class="st">f"{data['zone']}-{data['sec']}-{data['shelf']}"</span>
+        }
+    save_data(inventory)
+    <span class="kw">return</span> jsonify({<span class="st">'status'</span>: <span class="st">'success'</span>})</pre>
+      </div>
+    </div>
+    <div class="code-pane" id="pane-ipc">
+      <div class="code-desc">
+        <h3>파일 기반 IPC (프로세스 간 통신)</h3>
+        <p>Python Flask 서버와 C++ 백엔드는 파일을 통해 통신합니다. Flask가 <code>commands.txt</code>에 명령을 append하면, C++ 백엔드가 이를 읽어 처리하고 <code>data.json</code>을 갱신합니다.</p>
+        <ul>
+          <li><code>commands.txt</code> — Flask → C++ 방향 명령 전달</li>
+          <li><code>data.json</code> — C++ → Flask 방향 재고 데이터 공유</li>
+        </ul>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span><span class="code-filename">commands.txt  (명령 프로토콜)</span></div>
+        <pre><span class="cm"># 수량 변경: QTY,&lt;바코드&gt;,&lt;증감량&gt;</span>
+<span class="st">QTY,A100,10</span>       <span class="cm"># A100 바코드 재고 10개 증가</span>
+<span class="st">QTY,B200,-5</span>       <span class="cm"># B200 바코드 재고 5개 감소</span>
+
+<span class="cm"># 신규 입고: NEW,&lt;바코드&gt;,&lt;상품명&gt;,&lt;수량&gt;,&lt;구역&gt;,&lt;섹션&gt;,&lt;선반&gt;</span>
+<span class="st">NEW,C300,노트북,50,A,1,1</span>
+<span class="st">NEW,D400,마우스,200,B,2,3</span></pre>
+        <div class="code-header" style="margin-top:1rem;border-top:1px solid var(--border);"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span><span class="code-filename">data.json  (공유 재고 데이터)</span></div>
+        <pre>{
+  <span class="kw">"A100"</span>: { <span class="kw">"name"</span>: <span class="st">"노트북"</span>, <span class="kw">"quantity"</span>: <span class="nm">50</span>, <span class="kw">"location"</span>: <span class="st">"A-1-1"</span> },
+  <span class="kw">"B200"</span>: { <span class="kw">"name"</span>: <span class="st">"마우스"</span>, <span class="kw">"quantity"</span>: <span class="nm">200</span>, <span class="kw">"location"</span>: <span class="st">"B-2-3"</span> }
+}</pre>
+      </div>
+    </div>
+    <div class="code-pane" id="pane-data">
+      <div class="code-desc">
+        <h3>핵심 데이터 구조</h3>
+        <p>사용자 인증은 SHA-256 해시로 비밀번호를 저장하며, 주문은 상태 흐름을 포함한 구조로 관리됩니다.</p>
+        <ul>
+          <li><code>users.json</code> — 계정·역할·해시 비밀번호</li>
+          <li><code>orders.json</code> — 주문 목록 및 상태</li>
+        </ul>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span><span class="code-filename">users.json</span></div>
+        <pre>[
+  {
+    <span class="kw">"username"</span>: <span class="st">"admin"</span>,
+    <span class="kw">"password"</span>: <span class="st">"03ac674216f3e15c..."</span>,  <span class="cm">// SHA-256</span>
+    <span class="kw">"role"</span>:     <span class="st">"Admin"</span>               <span class="cm">// Admin | Operator</span>
+  }
+]</pre>
+        <div class="code-header" style="margin-top:1rem;border-top:1px solid var(--border);"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span><span class="code-filename">orders.json</span></div>
+        <pre>[
+  {
+    <span class="kw">"id"</span>: <span class="st">"ORD0001"</span>, <span class="kw">"barcode"</span>: <span class="st">"A100"</span>, <span class="kw">"name"</span>: <span class="st">"노트북"</span>,
+    <span class="kw">"qty"</span>: <span class="nm">10</span>, <span class="kw">"type"</span>: <span class="st">"출고"</span>,
+    <span class="kw">"status"</span>: <span class="st">"대기중"</span>,    <span class="cm">// 대기중→처리중→완료|취소</span>
+    <span class="kw">"created_at"</span>: <span class="st">"2026-06-02 14:30"</span>
+  }
+]</pre>
+      </div>
+    </div>
+    <div class="code-pane" id="pane-order">
+      <div class="code-desc">
+        <h3>주문 생성 및 재고 자동 반영</h3>
+        <p>주문 등록 시 유형에 따라 재고가 즉시 변경됩니다.</p>
+        <ul>
+          <li>출고 주문 → 재고 <span class="hl-red">차감</span> (0 이하 불가)</li>
+          <li>발주 주문 → 재고 <span class="hl-green">증가</span></li>
+        </ul>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span><span class="code-filename">LogisticsWeb.py — create_order()</span></div>
+        <pre><span class="c">@app.route('/api/orders', methods=['POST'])</span>
+<span class="c">@login_required</span>
+<span class="kw">def</span> <span class="fn">create_order</span>():
+    barcode    = data.get(<span class="st">'barcode'</span>)
+    qty        = int(data.get(<span class="st">'qty'</span>, <span class="nm">1</span>))
+    order_type = data.get(<span class="st">'type'</span>, <span class="st">'출고'</span>)
+
+    inventory = load_data()
+    <span class="kw">if</span> barcode <span class="kw">in</span> inventory:
+        <span class="kw">if</span> order_type == <span class="st">'출고'</span>:
+            inventory[barcode][<span class="st">'quantity'</span>] = max(
+                <span class="nm">0</span>, inventory[barcode][<span class="st">'quantity'</span>] - qty)
+        <span class="kw">elif</span> order_type == <span class="st">'발주(재입고)'</span>:
+            inventory[barcode][<span class="st">'quantity'</span>] += qty
+        save_data(inventory)
+
+    orders.append({<span class="st">'id'</span>: <span class="st">f"ORD{len(orders)+1:04d}"</span>, <span class="st">'status'</span>: <span class="st">'대기중'</span>, ...})
+    save_orders(orders)
+    <span class="kw">return</span> jsonify({<span class="st">'status'</span>: <span class="st">'success'</span>})</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<footer>© 2026 물류창고 자동화 시스템 · Logistics Automation v2.0</footer>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.code-pane').forEach(p => p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('pane-' + name).classList.add('active');
+}
+</script>
+</body>
+</html>
